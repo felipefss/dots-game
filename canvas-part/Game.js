@@ -17,6 +17,24 @@ class Game {
       isClicked: false,
     };
     this.links = [];
+    this.squares = [];
+
+    // const p1 = new Point(0, 0, { x: this.offsetX, y: this.offsetY });
+    // const p2 = new Point(p1.i, p1.j + 1, { x: p1.coords.x + this.distanceBetweenDots, y: p1.coords.y });
+    // const p3 = new Point(p1.i + 1, p1.j, { x: p1.coords.x, y: p1.coords.y + this.distanceBetweenDots });
+    // const p4 = new Point(p1.i + 1, p1.j + 1, {
+    //   x: p1.coords.x + this.distanceBetweenDots,
+    //   y: p1.coords.y + this.distanceBetweenDots,
+    // });
+    // this.links.push(new Link(p1, p2, 'gray'));
+    // this.links.push(new Link(p1, p3, 'gray'));
+    // this.links.push(new Link(p2, p4, 'gray'));
+    // this.links.push(new Link(p3, p4, 'gray'));
+
+    // this.squares.push({
+    //   p1,
+    //   text: this.currentPlayer.initial,
+    // });
 
     canvas.addEventListener('mousemove', (event) => {
       const x = event.offsetX;
@@ -59,6 +77,14 @@ class Game {
       ctx.lineWidth = 3;
       ctx.strokeStyle = link.color;
       ctx.stroke();
+    });
+
+    // Render players initials in squares
+    this.squares.forEach((square) => {
+      ctx.font = '18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(square.text, square.p1.coords.x + 12.5, square.p1.coords.y + 12.5);
     });
 
     const { x: mouseX, y: mouseY, isClicked } = this.mouse;
@@ -110,11 +136,49 @@ class Game {
       ctx.stroke();
     }
 
+    // Save player selection and check for completed square
     if (endPoint && isClicked) {
       this.mouse.isClicked = false;
-      this.links.push(new Link(startPoint, endPoint, this.currentPlayer.color));
-      this.currentPlayer = this.players.find((player) => player !== this.currentPlayer);
-      console.log(this.currentPlayer);
+      let wasSquareCompleted = false;
+      const newLink = new Link(startPoint, endPoint, this.currentPlayer.color);
+
+      if (!Link.includes(this.links, newLink)) {
+        this.links.push(newLink);
+        this.links.sort(Link.sort);
+
+        // Get all horizontal links, except for the last row
+        const horizontalLinks = this.links.filter((link) => link.p1.i === link.p2.i && link.p1.i < this.size);
+
+        // Check for completed square
+        horizontalLinks.forEach((link) => {
+          const p1 = link.p1;
+          const p2 = new Point(p1.i, p1.j + 1, { x: p1.coords.x + this.distanceBetweenDots, y: p1.coords.y });
+          const p3 = new Point(p1.i + 1, p1.j, { x: p1.coords.x, y: p1.coords.y + this.distanceBetweenDots });
+          const p4 = new Point(p1.i + 1, p1.j + 1, {
+            x: p1.coords.x + this.distanceBetweenDots,
+            y: p1.coords.y + this.distanceBetweenDots,
+          });
+
+          if (
+            Link.includes(this.links, new Link(p1, p2)) &&
+            Link.includes(this.links, new Link(p1, p3)) &&
+            Link.includes(this.links, new Link(p3, p4)) &&
+            Link.includes(this.links, new Link(p2, p4)) &&
+            !this.squares.find((square) => _.isEqual(square.p1, p1))
+          ) {
+            this.squares.push({
+              p1,
+              text: this.currentPlayer.initial,
+            });
+            wasSquareCompleted = true;
+          }
+        });
+
+        if (!wasSquareCompleted) {
+          this.currentPlayer = this.players.find((player) => player !== this.currentPlayer);
+        }
+      }
     }
+    // TODO: Calculate winner based on "size - 1" squares
   }
 }

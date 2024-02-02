@@ -8,8 +8,4 @@ class Point {
   toString() {
     return `(${this.i}, ${this.j})`;
   }
-
-  equals(other) {
-    return this.i === other.i && this.j === other.j;
-  }
 }
