@@ -1,9 +1,29 @@
-class Game {
-  /**
-   *
-   * @param {HTMLCanvasElement} canvas
-   */
-  constructor(canvas) {
+import { isEqual } from 'lodash';
+
+import { Link } from './Link';
+import { Player } from './Player';
+import { Point } from './Point';
+
+export class Game {
+  canvas: HTMLCanvasElement;
+  distanceBetweenDots: number;
+  offsetX: number;
+  offsetY: number;
+  size: number;
+  players: Player[];
+  currentPlayer: Player;
+  mouse: {
+    x: number;
+    y: number;
+    isClicked: boolean;
+  };
+  links: Link[];
+  squares: {
+    p1: Point;
+    text: string;
+  }[];
+
+  constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.distanceBetweenDots = 25;
     this.offsetX = 12;
@@ -19,27 +39,11 @@ class Game {
     this.links = [];
     this.squares = [];
 
-    // const p1 = new Point(0, 0, { x: this.offsetX, y: this.offsetY });
-    // const p2 = new Point(p1.i, p1.j + 1, { x: p1.coords.x + this.distanceBetweenDots, y: p1.coords.y });
-    // const p3 = new Point(p1.i + 1, p1.j, { x: p1.coords.x, y: p1.coords.y + this.distanceBetweenDots });
-    // const p4 = new Point(p1.i + 1, p1.j + 1, {
-    //   x: p1.coords.x + this.distanceBetweenDots,
-    //   y: p1.coords.y + this.distanceBetweenDots,
-    // });
-    // this.links.push(new Link(p1, p2, 'gray'));
-    // this.links.push(new Link(p1, p3, 'gray'));
-    // this.links.push(new Link(p2, p4, 'gray'));
-    // this.links.push(new Link(p3, p4, 'gray'));
-
-    // this.squares.push({
-    //   p1,
-    //   text: this.currentPlayer.initial,
-    // });
-
     canvas.addEventListener('mousemove', (event) => {
       const x = event.offsetX;
       const y = event.offsetY;
-      this.mouse = { x, y };
+      this.mouse.x = x;
+      this.mouse.y = y;
     });
 
     canvas.addEventListener('click', () => {
@@ -47,11 +51,7 @@ class Game {
     });
   }
 
-  /**
-   *
-   * @param {CanvasRenderingContext2D} ctx
-   */
-  render(ctx) {
+  render(ctx: CanvasRenderingContext2D) {
     // Render board
     for (let i = 0; i < this.size; i++) {
       for (let j = 0; j < this.size; j++) {
@@ -164,7 +164,7 @@ class Game {
             Link.includes(this.links, new Link(p1, p3)) &&
             Link.includes(this.links, new Link(p3, p4)) &&
             Link.includes(this.links, new Link(p2, p4)) &&
-            !this.squares.find((square) => _.isEqual(square.p1, p1))
+            !this.squares.find((square) => isEqual(square.p1, p1))
           ) {
             this.squares.push({
               p1,
@@ -175,7 +175,7 @@ class Game {
         });
 
         if (!wasSquareCompleted) {
-          this.currentPlayer = this.players.find((player) => player !== this.currentPlayer);
+          this.currentPlayer = this.players.find((player) => player !== this.currentPlayer) ?? this.currentPlayer;
         }
       }
     }
