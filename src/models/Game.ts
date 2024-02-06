@@ -23,13 +23,13 @@ export class Game {
     text: string;
   }[];
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, playersNames: string[]) {
     this.canvas = canvas;
     this.distanceBetweenDots = 25;
     this.offsetX = 12;
     this.offsetY = 12;
     this.size = Math.floor(canvas.width / this.distanceBetweenDots);
-    this.players = [new Player('1'), new Player('2')];
+    this.players = [new Player(playersNames[0]), new Player(playersNames[1])];
     this.currentPlayer = this.players[0];
     this.mouse = {
       x: 0,
@@ -51,8 +51,7 @@ export class Game {
     });
   }
 
-  render(ctx: CanvasRenderingContext2D) {
-    // Render board
+  renderBoard(ctx: CanvasRenderingContext2D) {
     for (let i = 0; i < this.size; i++) {
       for (let j = 0; j < this.size; j++) {
         ctx.beginPath();
@@ -68,8 +67,9 @@ export class Game {
         ctx.fill();
       }
     }
+  }
 
-    // Render links
+  renderLinks(ctx: CanvasRenderingContext2D) {
     this.links.forEach((link) => {
       ctx.beginPath();
       ctx.moveTo(link.p1.coords.x, link.p1.coords.y);
@@ -78,14 +78,21 @@ export class Game {
       ctx.strokeStyle = link.color;
       ctx.stroke();
     });
+  }
 
-    // Render players initials in squares
+  calculateCompletedSquares(ctx: CanvasRenderingContext2D) {
     this.squares.forEach((square) => {
       ctx.font = '18px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(square.text, square.p1.coords.x + 12.5, square.p1.coords.y + 12.5);
     });
+  }
+
+  render(ctx: CanvasRenderingContext2D) {
+    this.renderBoard(ctx);
+    this.renderLinks(ctx);
+    this.calculateCompletedSquares(ctx);
 
     const { x: mouseX, y: mouseY, isClicked } = this.mouse;
     const startX =
@@ -174,11 +181,16 @@ export class Game {
           }
         });
 
+        // Switch player only if square was not completed
         if (!wasSquareCompleted) {
           this.currentPlayer = this.players.find((player) => player !== this.currentPlayer) ?? this.currentPlayer;
         }
+
+        const totalPossibleSquares = (this.size - 1) ** 2;
+        if (this.squares.length === totalPossibleSquares) {
+          console.log('Game over');
+        }
       }
     }
-    // TODO: Calculate winner based on "size - 1" squares
   }
 }
