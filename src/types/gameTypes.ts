@@ -5,12 +5,11 @@ export enum GameState {
 }
 
 export interface Players {
-  p1: {
-    name: string;
-    score: number;
-  };
-  p2: {
-    name: string;
-    score: number;
-  };
+  p1: string;
+  p2: string;
+}
+
+export interface PlayersScore {
+  player1Score: number;
+  player2Score: number;
 }

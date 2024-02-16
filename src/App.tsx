@@ -7,7 +7,7 @@ export default function App() {
   const { gameState } = useGameContext();
 
   return (
-    <main className="bg-slate-300 flex flex-col h-dvh items-center p-10 gap-4">
+    <main className="bg-slate-300 flex flex-col h-dvh items-center p-4 gap-4">
       <h1 className="text-4xl">Dots Game</h1>
 
       {gameState === GameState.ChoosePlayers && <ChoosePlayers />}

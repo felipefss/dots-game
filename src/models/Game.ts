@@ -3,6 +3,7 @@ import { isEqual } from 'lodash';
 import { Link } from './Link';
 import { Player } from './Player';
 import { Point } from './Point';
+import { PlayersScore } from '../types/gameTypes';
 
 export class Game {
   canvas: HTMLCanvasElement;
@@ -89,7 +90,16 @@ export class Game {
     });
   }
 
-  render(ctx: CanvasRenderingContext2D) {
+  renderScores(setScore: ({ player1Score, player2Score }: PlayersScore) => void) {
+    const [player1, player2] = this.players;
+
+    setScore({
+      player1Score: player1.score,
+      player2Score: player2.score,
+    });
+  }
+
+  render(ctx: CanvasRenderingContext2D, setScores: ({ player1Score, player2Score }: PlayersScore) => void) {
     this.renderBoard(ctx);
     this.renderLinks(ctx);
     this.calculateCompletedSquares(ctx);
@@ -178,6 +188,8 @@ export class Game {
               text: this.currentPlayer.initial,
             });
             wasSquareCompleted = true;
+            this.currentPlayer.score += 1;
+            this.renderScores(setScores);
           }
         });
 
